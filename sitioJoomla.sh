@@ -18,7 +18,7 @@ if [ "$(git config --global alias.sitio-joomla)" = "" ]
 then
 	echo -en "${light}Congigurando el Alias${end} ";
 	DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-	git config  --global alias.sitio-joomla  "'!bash $DIR/sitioJoomla.sh'"
+	git config  --global alias.sitio-joomla  "!bash $DIR/sitioJoomla.sh"
 	if [ $? -eq 0 ]
 	then
 		echo -e "<- ${white}Se creo satisfactoriamente${end}";
@@ -38,6 +38,7 @@ else
 	echo -e "${white}${MYSQL_CLIENT}${end}"
 	exit 0
 fi
+
 export	JOOMLA_DST=`git config joomla.dir-dst`;
 if [ "${JOOMLA_DST}" = "" ]
 then
@@ -68,24 +69,24 @@ function	installBD()
 	#Extraemos la información global de nuestro
 	######### Creando el usuario
 	echo -ne "Usuario ${light}$user${end}";
-	${MYSQL_CLIENT} --user=$mysql_admin --password=$mysql_admin_pass -e \
+	${MYSQL_CLIENT} --user=$mysql_admin --password="$mysql_admin_pass" -e \
 	"CREATE USER '$user'@'localhost' IDENTIFIED BY '$password';"
 	echo -e " [Creado]";
 	#mostrando los usuarios
 	#${MYSQL_CLIENT} --user=$mysql_admin --password=$mysql_admin_pass mysql "SELECT DISTINCT( user.User ) from user";
 	######### Creando la BD
 	echo -ne "Creando Bse de datos ${light}$database${end}";
-	${MYSQL_CLIENT} --user=$mysql_admin --password=$mysql_admin_pass -e \
+	${MYSQL_CLIENT} --user=$mysql_admin --password="$mysql_admin_pass" -e \
 	"CREATE DATABASE IF NOT EXISTS $database;"
 	echo -e " [Bien]";
 	
 	######### Otorgando privilegios
 	echo -ne "Otorgando privilegios de ${light}${database}${end} a ${light}${user}${end}";
-	${MYSQL_CLIENT} --user=$mysql_admin --password=$mysql_admin_pass -e "GRANT ALL PRIVILEGES ON $database.* TO '$user'@'localhost';"
+	${MYSQL_CLIENT} --user=$mysql_admin --password="$mysql_admin_pass" -e "GRANT ALL PRIVILEGES ON $database.* TO '$user'@'localhost';"
 	echo -e " [Bien]";
 	######### Actualizando privilegios
 	echo -ne "Actualizando permisos";
-	${MYSQL_CLIENT} --user=$mysql_admin --password=$mysql_admin_pass -e "FLUSH PRIVILEGES;"
+	${MYSQL_CLIENT} --user=$mysql_admin --password="$mysql_admin_pass" -e "FLUSH PRIVILEGES;"
 	echo -e " [Bien]";
 }
 ################################################################################
@@ -122,7 +123,7 @@ function borrarTodasLasTablas()
 	do
 		echo -ne "${red}Borrando${end} -> ${yellow}${database}${end}.${light}${t}${end}"
 		echo -ne "                                                      \r"
-		${MYSQL_CLIENT} -u ${login} -p${password} -h localhost ${database} -e "drop table ${t}"
+		${MYSQL_CLIENT} -u ${login} -p "${password}" -h localhost ${database} -e "drop table ${t}"
 	done
 }
 #########################################################################################
