@@ -30,14 +30,11 @@ fi
 
 export REPO_PATH=$(pwd);
 export MYSQL_CLIENT=$(git config joomla.mysql-client);
-if [ "$?" -eq "0" ]
+if [ "${MYSQL_CLIENT}" == '' ]
 then
-	echo "${light}Configuración especial sobre su cliente mysql:${end}"
-	echo -e "${white}${MYSQL_CLIENT}${end}"
-	exit 0
-else
 	MYSQL_CLIENT=$(which mysql);
 fi
+echo -e "\t->${yellow}joomla.mysql-client: ${light}${MYSQL_CLIENT}${end}"
 
 export	JOOMLA_DST=`git config joomla.dir-dst`;
 if [ "${JOOMLA_DST}" = "" ]
@@ -123,7 +120,7 @@ function borrarTodasLasTablas()
 	do
 		echo -ne "${red}Borrando${end} -> ${yellow}${database}${end}.${light}${t}${end}"
 		echo -ne "                                                      \r"
-		${MYSQL_CLIENT} -u ${login} -p "${password}" -h localhost ${database} -e "drop table ${t}"
+		${MYSQL_CLIENT} --user="${login}" --password="${password}" ${database} -e "drop table ${t}"
 	done
 }
 #########################################################################################
@@ -188,7 +185,7 @@ function actualizaBD()
 	for f in `find ${REPO_PATH}/sitio_joomla/ -iregex ".*sql$" | sort`
 	do
 		echo -ne "${light}Cargando datos...${end}\r";
-		${MYSQL_CLIENT} --default-character-set=utf8 -u ${login} -p${password} -h localhost ${database} < "${f}";
+		${MYSQL_CLIENT} --user="${login}" --password="${password}" ${database} < "${f}";
 	done;
 	echo -e "  → ${cyan}Los datos han sido actualizados correctamente${end}"
 }
