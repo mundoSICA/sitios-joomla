@@ -32,11 +32,11 @@ export REPO_PATH=$(pwd);
 export MYSQL_CLIENT=$(git config joomla.mysql-client);
 if [ "$?" -eq "0" ]
 then
-	MYSQL_CLIENT=$(which mysql);
-else
 	echo "${light}Configuración especial sobre su cliente mysql:${end}"
 	echo -e "${white}${MYSQL_CLIENT}${end}"
 	exit 0
+else
+	MYSQL_CLIENT=$(which mysql);
 fi
 
 export	JOOMLA_DST=`git config joomla.dir-dst`;
