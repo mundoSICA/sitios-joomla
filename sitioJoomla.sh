@@ -7,11 +7,20 @@
 #| | | | | | |_| | | | | (_| | (_) \__ \ | (_| (_| || (_| (_) | | | | | |
 #|_| |_| |_|\__,_|_| |_|\__,_|\___/|___/_|\___\__,_(_)___\___/|_| |_| |_|
 ##########################################################################################
+
+
+##########################################################################################
+# Manejo de colores, por favor consulte el siguiente link para mayor información:
+# link: http://www.bashguru.com/2010/01/shell-colors-colorizing-shell-scripts.html
+##########################################################################################
 cyan='\e[0;36m'
+darkCyan='\e[1;36;40m'
 light='\e[1;36m'
 red="\e[0;31m"
 yellow="\e[0;33m"
+darkYellow="\e[1;33;40m"
 white="\e[0;37m"
+darkGreen="\e[1;32;40m"
 end='\e[0m'
  
 if [ "$(git config --global alias.sitio-joomla)" = "" ]
@@ -87,9 +96,43 @@ function	installBD()
 	echo -e " [Bien]";
 }
 ################################################################################
-# Categoria: Security
+# Nos ayuda a configurar un host virtual apache
+# Categoria: Tools
+################################################################################
+function	vhost()
+{
+	echo -e "${light}Bienvenido a la configuración apache${end}"
+	echo -ne "${darkGreen}Inserte el nombre host Virual [ENTER]:${end} "
+	read nombre
+	echo -ne "${darkGreen}Inserte la ruta  documentRoot [ENTER]:${end} "
+	read documentRoot
+	email=$(git config user.email)
+	clear
+	echo -e "${darkYellow}1.-${darkCyan}Inserte la siguiente configuración en su archivo de hosts virtuales de Apache${end}"
+	echo -e "  (Tipicamente se localiza en: /etc/apache2/sites-enabled/000-default)"
+	echo -e "${yellow}<VirtualHost *:80>
+	RewriteEngine ${darkYellow}On${yellow}
+	RewriteOptions ${darkYellow}Inherit${yellow}
+	ServerAdmin ${darkYellow}${email}${yellow}
+	ServerName ${darkYellow}${nombre}${yellow}
+	DocumentRoot ${darkYellow}${documentRoot}${yellow}
+</VirtualHost>${end}"
+	echo -e "${darkYellow}2.-${darkCyan}Agregue la siguiente configuración en su archivos hots${end}"
+	echo -e "  (Se localiza en: /etc/hosts)"
+	echo -e "${yellow}127.0.0.1\t${darkYellow}botanaselangel${end}"
+	echo -ne "Presione enter para continuar..."
+	read trash
+	clear
+	echo -e "${darkYellow}3.-${darkCyan}Reinicie su servidor web${end}"
+	echo -e "  Por ejemplo: sudo /etc/init.d/apache2 restart"
+	echo -e "  ó Quizas   : sudo /opt/lammp/lammp apache-restart"
+	echo -e "${darkYellow}4.-${darkCyan}Revise que el servidor web funcione${end}"
+	echo -e "  Abra su navegador web con la dirección ${darkYellow}http://${nombre}/${end}"
+}
+################################################################################
 # Revisa que todos los directorios en el repositorio no tienen el archivo
 # Index.html de no existir crea el archivo.
+# Categoria: Security
 ################################################################################
 function existeIndexHTML()
 {
@@ -131,13 +174,12 @@ function actualizaArchivo(){
 	#Si el archivo no existe entonces significa que fue borrado
 	if [ ! -e "${REPO_PATH}/${localName}" ]
 	then
-		echo -ne "  → ${red}☹ Archivo Eliminado  :${end} ${localName}";
 		if [ -e "${fileDst}" ]
 		then
-			echo -ne "\t←--${red}[Borrando]${end}";
+			echo -ne "  → ${red}☹ Archivo Eliminado  :${end} ${localName}";
+			echo -e "\t←--${red}[Borrando]${end}";
 			rm ${fileDst};
 		fi
-		echo "";
 	else
 		echo -ne "  → ${yellow}😁 Archivo Modificado :${end} ${localName}";
 		#Si la carpeta destino no existe la creamos.
@@ -148,7 +190,7 @@ function actualizaArchivo(){
 			echo "Directorio ${dirDst}";
 			mkdir -p "${dirDst}"
 		fi
-		cp -r "${REPO_PATH}/${localName}" "${fileDst}";
+		cp "${REPO_PATH}/${localName}" "${fileDst}";
 		echo ''
 	fi
 }
@@ -239,6 +281,9 @@ echo -e "\t\t\t${light}Actualizador de proyectos Joomla${end}
 	Esta página de ayuda:
 	${cyan}git sitio-joomla -ayuda${end}
 
+	Nos ayuda a configurar hosts virtuales de apache:
+	${cyan}git sitio-joomla -vhost${end}
+
  ${light}Autor${end}
 	Fitorec
 ";
@@ -257,14 +302,16 @@ then
 		"-instalar")
 				installBD
 				actualizaBD
-				existeIndexHTML
 				actualizar_path
 				permisos;
+				;;
+		"-vhost")
+				echo 'vhost';
+				vhost
 				;;
 		*)
 			if [ $? -eq 0 ]
 			then
-				existeIndexHTML
 				num_commit=$(echo "${arg}" | grep -oE '[0-9]+$');
 				actualizar_path ${num_commit}
 				permisos;
@@ -273,7 +320,6 @@ then
 		esac
 	done
 else
-	existeIndexHTML
+	#existeIndexHTML
 	actualizar_path 0
-	permisos;
 fi
